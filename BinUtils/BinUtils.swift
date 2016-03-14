@@ -99,6 +99,7 @@ func unpack(var format:String, _ data:NSData) -> [AnyObject] {
     - so the first character is mandatory, must be '=', '<', '>' or '!'
     - native byte order '=' assumes a little-endian system (eg. Intel x86)
     - 'p' and 'P' format are unsupported
+    - the format does not have to match with the exact quantity of data provided
     */
 
     assert(Int(OSHostByteOrder()) == OSLittleEndian, "\(__FILE__) assumes little endian, but host is big endian")

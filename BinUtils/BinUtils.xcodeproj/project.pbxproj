@@ -32,6 +32,7 @@
 		036803E41C96DF5600CC95D7 /* BinUtilsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BinUtilsTests.swift; sourceTree = "<group>"; };
 		036803E61C96DF5600CC95D7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		036803EA1C96DFE200CC95D7 /* BinUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BinUtils.swift; sourceTree = SOURCE_ROOT; };
+		036803ED1C96E2D300CC95D7 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -55,6 +56,7 @@
 		036803CB1C96DF2F00CC95D7 = {
 			isa = PBXGroup;
 			children = (
+				036803ED1C96E2D300CC95D7 /* README.md */,
 				036803D61C96DF2F00CC95D7 /* BinUtils */,
 				036803E31C96DF5600CC95D7 /* BinUtilsTests */,
 				036803D51C96DF2F00CC95D7 /* Products */,
