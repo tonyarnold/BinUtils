@@ -132,7 +132,7 @@ func unpack(var format:String, _ data:NSData) -> [AnyObject] {
             currentString = nil
         }
         
-        if let i = Int(String(c)) where i >= 0 && i <= 9 {
+        if let i = Int(String(c)) where 0...9 ~= i {
             if n > 0 { n *= 10 }
             n += i
             continue
