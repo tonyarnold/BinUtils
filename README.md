@@ -5,6 +5,7 @@ Swift functions to ease working with binary formats
 
 - return the hexadecimal representation of the binary data
 - akin to [hexlify() in Python binascii module](https://docs.python.org/2/library/binascii.html#binascii.hexlify)
+- for iOS and OS X
 
 ```swift
 let data = "Hello".dataUsingEncoding(NSUTF8StringEncoding)!
