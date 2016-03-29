@@ -30,7 +30,7 @@ func bytesToType <T> (value: [UInt8], _: T.Type) -> T {
     }
 }
 
-func typeToBytes <T> (var value: T) -> [UInt8] {
+func typeToBytes <T> (inout value: T) -> [UInt8] {
     return withUnsafePointer(&value) {
         Array(UnsafeBufferPointer(start: UnsafePointer<UInt8>($0), count: sizeof(T)))
     }
@@ -91,25 +91,95 @@ func readFloatingPointType<T>(type:T.Type, bytes:[UInt8], inout loc:Int, isBigEn
     return bytesToType(sub_, T.self)
 }
 
-func unpack(var format:String, _ data:NSData) -> [AnyObject] {
-    
-    /*
-    similar to unpack() in Python's struct module https://docs.python.org/2/library/struct.html but:
-    - native sizes '@' are unsupported
-    - so the first character is mandatory, must be '=', '<', '>' or '!'
-    - native byte order '=' assumes a little-endian system (eg. Intel x86)
-    - 'p' and 'P' format are unsupported
-    - the format does not have to match with the exact quantity of data provided
-    */
-
-    assert(Int(OSHostByteOrder()) == OSLittleEndian, "\(__FILE__) assumes little endian, but host is big endian")
+func assertThatFormatStartsWithAValidCharacter(format:String) {
     
     if let firstChar = format.characters.first {
         let s : NSString = String(firstChar)
         let c = s.substringToIndex(1)
+        
+        if c == "@" {
+            assertionFailure("native size is unsupported")
+        }
+        
         let firstCharOptions = "=<>!"
         assert(firstCharOptions.containsString(c), "format '\(format)' first character must be among '\(firstCharOptions)'")
     }
+}
+
+func numberOfBytesInFormat(format:String) -> Int {
+
+    var numberOfBytes = 0
+    
+    var n = 0 // repeat counter
+    
+    var mutableFormat = format
+    
+    while mutableFormat.characters.count > 0 {
+        
+        let c = mutableFormat.removeAtIndex(mutableFormat.startIndex)
+        
+        if let i = Int(String(c)) where 0...9 ~= i {
+            if n > 0 { n *= 10 }
+            n += i
+            continue
+        }
+        
+        if c == "s" {
+            numberOfBytes += max(n,1)
+            n = 0
+            continue
+        }
+        
+        for _ in 0..<max(n,1) {
+            
+            switch(c) {
+                
+            case "<", "=", ">", "!", " ":
+                ()
+            case "c", "b", "B", "x", "?":
+                numberOfBytes += 1
+            case "h", "H":
+                numberOfBytes += 2
+            case "i", "l", "I", "L", "f":
+                numberOfBytes += 4
+            case "q", "Q", "d":
+                numberOfBytes += 8
+            default:
+                assertionFailure("-- unsupported format \(c)")
+            }
+        }
+        
+        n = 0
+    }
+    
+    return numberOfBytes
+}
+
+func assertThatFormatHasTheSameSizeAsData(format:String, data:NSData) {
+    let sizeAccordingToFormat = numberOfBytesInFormat(format)
+    let dataLength = data.length
+    guard sizeAccordingToFormat == dataLength else {
+        print("format \"\(format)\" expects \(sizeAccordingToFormat) bytes but data is \(dataLength) bytes")
+        assert(sizeAccordingToFormat == dataLength)
+        return
+    }
+}
+
+func unpack(format:String, _ data:NSData) -> [AnyObject] {
+    
+    /*
+     similar to unpack() in Python's struct module https://docs.python.org/2/library/struct.html but:
+     - native sizes '@' are unsupported
+     - so the first character is mandatory, must be '=', '<', '>' or '!'
+     - native byte order '=' assumes a little-endian system (eg. Intel x86)
+     - 'p' and 'P' format are unsupported
+     */
+    
+    assert(Int(OSHostByteOrder()) == OSLittleEndian, "\(#file) assumes little endian, but host is big endian")
+
+    assertThatFormatStartsWithAValidCharacter(format)
+
+    assertThatFormatHasTheSameSizeAsData(format, data:data)
     
     var isBigEndian = false
     
@@ -121,20 +191,34 @@ func unpack(var format:String, _ data:NSData) -> [AnyObject] {
     
     var n = 0 // repeat counter
     
-    var currentString : String? = nil
+    var mutableFormat = format
     
-    while format.characters.count > 0 {
+    while mutableFormat.characters.count > 0 {
         
-        let c = format.removeAtIndex(format.startIndex)
-        
-        if let cs = currentString where c != "s" {
-            a.append(cs)
-            currentString = nil
-        }
+        let c = mutableFormat.removeAtIndex(mutableFormat.startIndex)
         
         if let i = Int(String(c)) where 0...9 ~= i {
             if n > 0 { n *= 10 }
             n += i
+            continue
+        }
+        
+        if c == "s" {
+            let length = max(n,1)
+            let sub = Array(bytes[loc..<loc+length])
+            
+            // TODO: don't hardcode string encoding
+            guard let s = NSString(bytes: sub, length: length, encoding: NSWindowsCP1252StringEncoding) else {
+                assertionFailure("-- not a string: \(sub)")
+                return []
+            }
+            
+            a.append(s)
+            
+            loc += length
+            
+            n = 0
+            
             continue
         }
         
@@ -144,8 +228,6 @@ func unpack(var format:String, _ data:NSData) -> [AnyObject] {
             
             switch(c) {
                 
-            case "@":
-                assertionFailure("native size is unsupported")
             case "<", "=":
                 isBigEndian = false
             case ">", "!":
@@ -189,14 +271,6 @@ func unpack(var format:String, _ data:NSData) -> [AnyObject] {
             case "d":
                 let r = readFloatingPointType(Float64.self, bytes:bytes, loc:&loc, isBigEndian:isBigEndian)
                 o = Double(r)
-            case "s":
-                let s = NSString(format:"%C", bytes[loc]); loc += 1
-                
-                if currentString != nil {
-                    currentString! += (s as String)
-                } else {
-                    currentString = (s as String)
-                }
             case "x":
                 loc += 1
             case " ":
@@ -210,10 +284,6 @@ func unpack(var format:String, _ data:NSData) -> [AnyObject] {
         
         n = 0
         
-        if let cs = currentString {
-            a.append(cs)
-            currentString = nil
-        }
     }
     
     return a

@@ -70,6 +70,16 @@ class BinUtilsTests: XCTestCase {
         XCTAssertEqual(a[1] as? String, "A")
         XCTAssertEqual(a[2] as? String, "A")
     }
-    
+
+    func testFormatSizes() {
+
+        XCTAssertEqual(0, numberOfBytesInFormat(""))
+        XCTAssertEqual(1, numberOfBytesInFormat(">x"))
+        XCTAssertEqual(2, numberOfBytesInFormat(">h"))
+        XCTAssertEqual(4, numberOfBytesInFormat(">I"))
+        XCTAssertEqual(5, numberOfBytesInFormat(">5s"))
+        XCTAssertEqual(6, numberOfBytesInFormat(">5sb"))
+        XCTAssertEqual(8, numberOfBytesInFormat(">hBsf"))
+    }
 }
 
