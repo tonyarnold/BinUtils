@@ -97,15 +97,12 @@ func assertThatFormatStartsWithAValidCharacter(format:String) {
         let s : NSString = String(firstChar)
         let c = s.substringToIndex(1)
         
-        if c == "@" {
-            assertionFailure("native size is unsupported")
-        }
-        
-        let firstCharOptions = "=<>!"
+        let firstCharOptions = "@=<>!"
         assert(firstCharOptions.containsString(c), "format '\(format)' first character must be among '\(firstCharOptions)'")
     }
 }
 
+// akin to struct.calcsize(fmt)
 func numberOfBytesInFormat(format:String) -> Int {
 
     var numberOfBytes = 0
@@ -134,7 +131,7 @@ func numberOfBytesInFormat(format:String) -> Int {
             
             switch(c) {
                 
-            case "<", "=", ">", "!", " ":
+            case "@", "<", "=", ">", "!", " ":
                 ()
             case "c", "b", "B", "x", "?":
                 numberOfBytes += 1
@@ -144,6 +141,8 @@ func numberOfBytesInFormat(format:String) -> Int {
                 numberOfBytes += 4
             case "q", "Q", "d":
                 numberOfBytes += 8
+            case "P":
+                numberOfBytes += sizeof(Int)
             default:
                 assertionFailure("-- unsupported format \(c)")
             }
@@ -165,6 +164,10 @@ func assertThatFormatHasTheSameSizeAsData(format:String, data:NSData) {
     }
 }
 
+//func pack(format:String, objects:[AnyObject]) -> NSData {
+//    // TODO
+//}
+
 func unpack(format:String, _ data:NSData) -> [AnyObject] {
     
     /*
@@ -172,7 +175,7 @@ func unpack(format:String, _ data:NSData) -> [AnyObject] {
      - native sizes '@' are unsupported
      - so the first character is mandatory, must be '=', '<', '>' or '!'
      - native byte order '=' assumes a little-endian system (eg. Intel x86)
-     - 'p' and 'P' format are unsupported
+     - Pascal strings format 'p' is not supported
      */
     
     assert(Int(OSHostByteOrder()) == OSLittleEndian, "\(#file) assumes little endian, but host is big endian")
@@ -182,6 +185,7 @@ func unpack(format:String, _ data:NSData) -> [AnyObject] {
     assertThatFormatHasTheSameSizeAsData(format, data:data)
     
     var isBigEndian = false
+    var isNative = false
     
     var a : [AnyObject] = []
     
@@ -227,7 +231,9 @@ func unpack(format:String, _ data:NSData) -> [AnyObject] {
             var o : AnyObject?
             
             switch(c) {
-                
+            
+            case "@":
+                isNative = true
             case "<", "=":
                 isBigEndian = false
             case ">", "!":
@@ -271,6 +277,21 @@ func unpack(format:String, _ data:NSData) -> [AnyObject] {
             case "d":
                 let r = readFloatingPointType(Float64.self, bytes:bytes, loc:&loc, isBigEndian:isBigEndian)
                 o = Double(r)
+            case "P":
+                assert(isNative, "The 'P' format character is only available for the native byte ordering (selected with the '@' byte order character)")
+                
+                let pointerSize = sizeof(Int)
+                switch(pointerSize) {
+                case 4:
+                    let r = readIntegerType(UInt32.self, bytes: bytes, loc: &loc)
+                    o = Int(isBigEndian ? UInt32(bigEndian: r) : r)
+                case 8:
+                    let r = readIntegerType(UInt64.self, bytes: bytes, loc: &loc)
+                    o = Int(isBigEndian ? UInt64(bigEndian: r) : r)
+                default:
+                    assertionFailure("unsupported pointer size: \(pointerSize) bytes")
+                }
+                loc += pointerSize
             case "x":
                 loc += 1
             case " ":

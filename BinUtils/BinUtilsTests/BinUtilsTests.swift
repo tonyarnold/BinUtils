@@ -81,5 +81,11 @@ class BinUtilsTests: XCTestCase {
         XCTAssertEqual(6, numberOfBytesInFormat(">5sb"))
         XCTAssertEqual(8, numberOfBytesInFormat(">hBsf"))
     }
+    
+    func testPointerSize() {
+        let a = unpack("@P", unhexlify("0001000200000003")!)
+        XCTAssertEqual(a[0] as? Int, 216172782147338496)
+    }
+    
 }
 
