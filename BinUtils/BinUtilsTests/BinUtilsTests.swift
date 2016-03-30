@@ -81,35 +81,58 @@ class BinUtilsTests: XCTestCase {
         XCTAssertEqual(6, numberOfBytesInFormat(">5sb"))
         XCTAssertEqual(8, numberOfBytesInFormat(">hBsf"))
     }
-    
-    func testPointerSize() {
-        let a = unpack("@P", unhexlify("0001000200000003")!)
-        XCTAssertEqual(a[0] as? Int, 216172782147338496)
-    }
-    
+        
     func testPackLittleEndian() {
         let data = pack("<Ih", [1, 2])
         XCTAssertEqual(data, unhexlify("01000000 0200"))
     }
 
     func testPackBigEndian() {
-        let data = pack(">Ih", [1, 2])
-        XCTAssertEqual(data, unhexlify("00000001 0002"))
-    }
-
-    func testPackDefaultLittleEndianAndNativeSize() {
-        let data = pack("Ih", [1, 2])
-        XCTAssertEqual(data, unhexlify("00000000 01000000 00000000 00000200"))
-    }
-
-    func testPackPointer() {
-        let data = pack("@P", [1])
-        XCTAssertEqual(data, unhexlify("00000000 01000000"))
+        let data = pack(">Ih?", [1, 2, true])
+        XCTAssertEqual(data, unhexlify("00000001 0002 01"))
     }
 
     func testPackWithPadding() {
-        let data = pack("xh", [123])
-        XCTAssertEqual(data, unhexlify("00000000 00007b00"))
+        let data = pack("<xh", [123])
+        XCTAssertEqual(data, unhexlify("007b00"))
+    }
+
+    func testPackWithPaddingRepeat() {
+        let data = pack("<2xh", [1])
+        XCTAssertEqual(data, unhexlify("00000100"))
+    }
+
+    func testPackWithRepeats() {
+        let data = pack("<h2I", [0, 1, 2])
+        XCTAssertEqual(data, unhexlify("0000 01000000 02000000"))
+    }
+
+    func testPackWithRepeatsPlusCharacter() {
+        let data = pack("<h2Ic", [0, 1, 2, "x"])
+        XCTAssertEqual(data, unhexlify("0000 01000000 02000000 78"))
+    }
+
+    func testPackString() {
+        let data = pack("<2s", ["as"])
+        XCTAssertEqual(data, unhexlify("6173"))
+    }
+
+    func testPackString2() {
+        let data = pack("<2s2s", ["as", "df"])
+        XCTAssertEqual(data, unhexlify("6173 6466"))
+    }
+    
+    func testPack() {
+        let data = pack("<h2I3sf", [1, 2, 3, "asd", 0.5])
+        XCTAssertEqual(data, unhexlify("0100 02000000 03000000 617364 0000003f"))
+    }
+    
+    func testPackUnpackNetworkOrder() {
+        // http://effbot.org/librarybook/struct.htm
+        let data = pack("!ihb", [1, 2, 3])
+        let a = unpack("!ihb", data)
+        XCTAssertEqual(a[0] as? Int, 1)
+        XCTAssertEqual(a[1] as? Int, 2)
+        XCTAssertEqual(a[2] as? Int, 3)
     }
 }
-

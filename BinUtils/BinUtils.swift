@@ -92,15 +92,21 @@ func readFloatingPointType<T>(type:T.Type, bytes:[UInt8], inout loc:Int, isBigEn
     return bytesToType(sub_, T.self)
 }
 
-func assertThatFormatStartsWithAValidCharacter(format:String) {
+func isBigEndianFromMandatoryByteOrderFirstCharacter(format:String) -> Bool {
     
-    if let firstChar = format.characters.first {
-        let s : NSString = String(firstChar)
-        let c = s.substringToIndex(1)
-        
-        let firstCharOptions = "@=<>!"
-        assert(firstCharOptions.containsString(c), "format '\(format)' first character must be among '\(firstCharOptions)'")
-    }
+    guard let firstChar = format.characters.first else { assertionFailure("empty format"); return false }
+    
+    let s = String(firstChar) as NSString
+    let c = s.substringToIndex(1)
+    
+    if c == "@" { assertionFailure("native size and alignment is unsupported") }
+    
+    if c == "=" || c == "<" { return false }
+    if c == ">" || c == "!" { return true }
+    
+    assertionFailure("format '\(format)' first character must be among '=<>!'")
+    
+    return false
 }
 
 // akin to struct.calcsize(fmt)
@@ -165,7 +171,15 @@ func assertThatFormatHasTheSameSizeAsData(format:String, data:NSData) {
     }
 }
 
-func pack(format:String, _ objects:[AnyObject]) -> NSData {
+/*
+ pack() and unpack() similar to Python's struct module https://docs.python.org/2/library/struct.html BUT:
+ - native size and alignment '@' is not supported
+ - as a consequence, the byte order specifier character is mandatory and must be among "=<>!"
+ - native byte order '=' assumes a little-endian system (eg. Intel x86)
+ - Pascal strings format 'p' is not supported
+ */
+
+func pack(format:String, _ objects:[AnyObject], _ stringEncoding:NSStringEncoding=NSWindowsCP1252StringEncoding) -> NSData {
     
     var objectsQueue = Array(objects.reverse())
     
@@ -174,9 +188,7 @@ func pack(format:String, _ objects:[AnyObject]) -> NSData {
     let mutableData = NSMutableData()
     
     var isBigEndian = false
-    var useNativeSizes = false
-    var useNativeAlignment = false
-
+    
     let firstCharacter = mutableFormat.removeAtIndex(mutableFormat.startIndex)
     
     switch(firstCharacter) {
@@ -185,98 +197,97 @@ func pack(format:String, _ objects:[AnyObject]) -> NSData {
     case ">", "!":
         isBigEndian = true
     case "@":
-        useNativeSizes = true
-        useNativeAlignment = true
+        assertionFailure("native size and alignment '@' is unsupported'")
     default:
-        // not a byte order specifier
-        
-        // assume "@"
-        useNativeSizes = true
-        useNativeAlignment = true
-        
-        // put back the character at the beginning of the format string
-        mutableFormat.insert(firstCharacter, atIndex: mutableFormat.startIndex)
+        assertionFailure("unsupported format chacracter'")
     }
-
+    
+    var n = 0 // repeat counter
+    
     while mutableFormat.characters.count > 0 {
         
-        let f = mutableFormat.removeAtIndex(mutableFormat.startIndex)
+        let c = mutableFormat.removeAtIndex(mutableFormat.startIndex)
         
-        if f == "<" {
-            isBigEndian = false
+        if let i = Int(String(c)) where 0...9 ~= i {
+            if n > 0 { n *= 10 }
+            n += i
             continue
         }
         
-        if f == ">" {
-            isBigEndian = true
-            continue
-        }
-        
-        if f == "x" {
-            useNativeAlignment = true
-            continue
-        }
-        
-        guard let o = objectsQueue.popLast() else { assertionFailure("not enough objects to pack"); return NSData() }
-        
-        var bytes : [UInt8] = []
-        
-        switch(f) {
-        case "b":
-            bytes = typeToBytes(Int8(truncatingBitPattern:o as! Int))
-        case "h":
-            bytes = typeToBytes(Int16(truncatingBitPattern:o as! Int))
-        case "i", "l":
-            bytes = typeToBytes(Int32(truncatingBitPattern:o as! Int))
-        case "q":
-            bytes = typeToBytes(Int64(o as! Int))
-        case "B":
-            bytes = typeToBytes(UInt8(truncatingBitPattern:o as! Int))
-        case "H":
-            bytes = typeToBytes(UInt16(truncatingBitPattern:o as! Int))
-        case "I", "L":
-            bytes = typeToBytes(UInt32(truncatingBitPattern:o as! Int))
-        case "Q":
-            bytes = typeToBytes(UInt64(o as! Int))
-        case "f":
-            bytes = typeToBytes(Float32(o as! Double))
-        case "d":
-            bytes = typeToBytes(Float64(o as! Double))
-        case "P":
-            assert(useNativeSizes && useNativeAlignment, "The 'P' format character is only available for the native byte ordering (selected with the '@' byte order character)")
-            
-            let size = sizeof(Int)
-            switch size {
-            case 4:
-                bytes = typeToBytes(UInt32(truncatingBitPattern:o as! Int))
-            case 8:
-                bytes = typeToBytes(UInt32(truncatingBitPattern:o as! Int))
-            default:
-                assertionFailure("unsupported sizeof(Int): \(size)")
-            }
+        var o : AnyObject = 0
 
-        default:
-            assertionFailure("Unsupported packing format: \(f)")
+        if c == "s" {
+            o = objectsQueue.popLast()!
+
+            guard let stringData = (o as! String).dataUsingEncoding(stringEncoding) else { assertionFailure(); return NSData() }
+            var bytes = stringData.bytesArray()
+
+            let expectedSize = max(1, n)
+            
+            // pad ...
+            while bytes.count < expectedSize { bytes.append(0x00) }
+
+            // ... or trunk
+            if bytes.count > expectedSize { bytes = Array(bytes[0..<expectedSize]) }
+
+            assert(bytes.count == expectedSize)
+            
+            if isBigEndian { bytes = bytes.reverse() }
+            let data = NSData(bytes)
+            mutableData.appendData(data)
+
+            n = 0
+            continue
         }
         
-        if isBigEndian { bytes = bytes.reverse() }
-        var data = NSData(bytes)
-        
-        if useNativeAlignment || useNativeSizes {
-            let size = sizeof(Int)
-            if data.length < size {
-                while data.length < size {
-                    let zero = NSMutableData(data:unhexlify("00")!)
-                    zero.appendData(data)
-                    data = zero
-                }
+        for _ in 0..<max(n,1) {
+            
+            var bytes : [UInt8] = []
+
+            if c != "x" {
+                o = objectsQueue.popLast()!
             }
-            assert(data.length == size)
+            
+            switch(c) {
+            case "?":
+                bytes = (o as! Bool) ? [0x01] : [0x00]
+            case "c":
+                let charAsString = (o as! NSString).substringToIndex(1)
+                guard let data = charAsString.dataUsingEncoding(stringEncoding) else {
+                    assertionFailure("cannot decode character \(charAsString) using encoding \(stringEncoding)")
+                    return NSData()
+                }
+                bytes = data.bytesArray()
+            case "b":
+                bytes = typeToBytes(Int8(truncatingBitPattern:o as! Int))
+            case "h":
+                bytes = typeToBytes(Int16(truncatingBitPattern:o as! Int))
+            case "i", "l":
+                bytes = typeToBytes(Int32(truncatingBitPattern:o as! Int))
+            case "q", "Q":
+                bytes = typeToBytes(Int64(o as! Int))
+            case "B":
+                bytes = typeToBytes(UInt8(truncatingBitPattern:o as! Int))
+            case "H":
+                bytes = typeToBytes(UInt16(truncatingBitPattern:o as! Int))
+            case "I", "L":
+                bytes = typeToBytes(UInt32(truncatingBitPattern:o as! Int))
+            case "f":
+                bytes = typeToBytes(Float32(o as! Double))
+            case "d":
+                bytes = typeToBytes(Float64(o as! Double))
+            case "x":
+                bytes = [0x00]
+            default:
+                assertionFailure("Unsupported packing format: \(c)")
+            }
+            
+            if isBigEndian { bytes = bytes.reverse() }
+            let data = NSData(bytes)
+            mutableData.appendData(data)
         }
         
-        useNativeAlignment = false
-        
-        mutableData.appendData(data)
+        n = 0
     }
     
     return mutableData
@@ -284,21 +295,11 @@ func pack(format:String, _ objects:[AnyObject]) -> NSData {
 
 func unpack(format:String, _ data:NSData, _ stringEncoding:NSStringEncoding=NSWindowsCP1252StringEncoding) -> [AnyObject] {
     
-    /*
-     similar to unpack() in Python's struct module https://docs.python.org/2/library/struct.html but:
-     - native byte order '@' and '=' assume a little-endian system (eg. Intel x86)
-     - Pascal strings format 'p' is not supported
-     */
-    
     assert(Int(OSHostByteOrder()) == OSLittleEndian, "\(#file) assumes little endian, but host is big endian")
     
-    assertThatFormatStartsWithAValidCharacter(format)
+    let isBigEndian = isBigEndianFromMandatoryByteOrderFirstCharacter(format)
     
     assertThatFormatHasTheSameSizeAsData(format, data:data)
-    
-    var isBigEndian = false
-    var useNativeSizes = false
-    var useNativeAlignment = false
     
     var a : [AnyObject] = []
     
@@ -310,26 +311,7 @@ func unpack(format:String, _ data:NSData, _ stringEncoding:NSStringEncoding=NSWi
     
     var mutableFormat = format
     
-    let firstCharacter = mutableFormat.removeAtIndex(mutableFormat.startIndex)
-    
-    switch(firstCharacter) {
-    case "<", "=":
-        isBigEndian = false
-    case ">", "!":
-        isBigEndian = true
-    case "@":
-        useNativeSizes = true
-        useNativeAlignment = true
-    default:
-        // not a byte order specifier
-        
-        // assume "@"
-        useNativeSizes = true
-        useNativeAlignment = true
-
-        // put back the character at the beginning of the format string
-        mutableFormat.insert(firstCharacter, atIndex: mutableFormat.startIndex)
-    }
+    mutableFormat.removeAtIndex(mutableFormat.startIndex) // consume byte-order specifier
     
     while mutableFormat.characters.count > 0 {
         
@@ -404,21 +386,6 @@ func unpack(format:String, _ data:NSData, _ stringEncoding:NSStringEncoding=NSWi
             case "d":
                 let r = readFloatingPointType(Float64.self, bytes:bytes, loc:&loc, isBigEndian:isBigEndian)
                 o = Double(r)
-            case "P":
-                assert(useNativeSizes && useNativeAlignment, "The 'P' format character is only available for the native byte ordering (selected with the '@' byte order character)")
-                
-                let pointerSize = sizeof(Int)
-                switch(pointerSize) {
-                case 4:
-                    let r = readIntegerType(UInt32.self, bytes: bytes, loc: &loc)
-                    o = Int(isBigEndian ? UInt32(bigEndian: r) : r)
-                case 8:
-                    let r = readIntegerType(UInt64.self, bytes: bytes, loc: &loc)
-                    o = Int(isBigEndian ? UInt64(bigEndian: r) : r)
-                default:
-                    assertionFailure("unsupported pointer size: \(pointerSize) bytes")
-                }
-                loc += pointerSize
             case "x":
                 loc += 1
             case " ":
@@ -431,7 +398,6 @@ func unpack(format:String, _ data:NSData, _ stringEncoding:NSStringEncoding=NSWi
         }
         
         n = 0
-        
     }
     
     return a

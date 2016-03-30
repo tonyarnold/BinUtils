@@ -28,4 +28,7 @@ f.closeFile()
 assert(b[0] as? Int == 64207)
 assert(b[1] as? Int == 65261)
 
+let d = pack("<h2I3sf", [1, 2, 3, "asd", 0.5])
+assert(d == unhexlify("0100 02000000 03000000 617364 0000003f"))
+
 print("ok")

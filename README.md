@@ -22,6 +22,16 @@ let s = String(data: unhexlify("48656C6C6F")!, encoding: NSUTF8StringEncoding)
 assert(s == "Hello")
 ```
 
+**pack(fmt, [v2, v2, ...])**
+
+- return a string containing the values v1, v2, ... packed according to the given format
+- akin to [pack() in Python struct module](https://docs.python.org/2/library/struct.html#struct.pack)
+
+```swift
+let d = pack("<h2I3sf", [1, 2, 3, "asd", 0.5])
+assert(d == unhexlify("0100 02000000 03000000 617364 0000003f"))
+```
+
 **unpack(fmt, string)**
 
 - unpack the string according to the given format
