@@ -22,7 +22,7 @@ let s = String(data: unhexlify("48656C6C6F")!, encoding: NSUTF8StringEncoding)
 assert(s == "Hello")
 ```
 
-**pack(fmt, [v2, v2, ...])**
+**pack(fmt, [v1, v2, ...])**
 
 - return a string containing the values v1, v2, ... packed according to the given format
 - akin to [pack() in Python struct module](https://docs.python.org/2/library/struct.html#struct.pack)
