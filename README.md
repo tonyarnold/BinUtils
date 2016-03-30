@@ -38,7 +38,7 @@ assert(d == unhexlify("0100 02000000 03000000 617364 0000003f"))
 - akin to [unpack() in Python struct module](https://docs.python.org/2/library/struct.html#struct.unpack)
 
 ```swift
-let a = unpack(">hBsf", unhexlify("050001413fc00000")!)
+let a = unpack(">hBsf", unhexlify("0500 01 41 3fc00000")!)
 assert(a[0] as? Int == 1280)
 assert(a[1] as? Int == 1)
 assert(a[2] as? String == "A")
