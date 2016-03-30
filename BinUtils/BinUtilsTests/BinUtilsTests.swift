@@ -30,7 +30,7 @@ class BinUtilsTests: XCTestCase {
         
         let s2 = hexlify(unhexlify(s1)!)
         
-        XCTAssertEqual(s1.uppercaseString, s2)
+        XCTAssertEqual(s1.lowercaseString, s2)
     }
 
     func testUnpackWithFile() {
@@ -87,5 +87,29 @@ class BinUtilsTests: XCTestCase {
         XCTAssertEqual(a[0] as? Int, 216172782147338496)
     }
     
+    func testPack1() {
+        let data = pack("Ih", [123, 123])
+        XCTAssertEqual(data, unhexlify("7b0000007b00"))
+    }
+
+    func testPack2() {
+        let data = pack("hhl", [1, 2, 3])
+        XCTAssertEqual(data, unhexlify("0100020003000000"))
+    }
+
+    func testPack3() {
+        let data = pack("<hhl", [1, 2, 3])
+        XCTAssertEqual(data, unhexlify("0100020003000000"))
+    }
+
+    func testPack4() {
+        let data = pack(">hhl", [1, 2, 3])
+        XCTAssertEqual(data, unhexlify("0001000200000003"))
+    }
+    
+    func testPackWithAlignment() {
+        let data = pack("xh", [123])
+        XCTAssertEqual(data, unhexlify("00007b00"))
+    }
 }
 

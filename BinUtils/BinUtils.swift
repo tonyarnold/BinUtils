@@ -30,8 +30,9 @@ func bytesToType <T> (value: [UInt8], _: T.Type) -> T {
     }
 }
 
-func typeToBytes <T> (inout value: T) -> [UInt8] {
-    return withUnsafePointer(&value) {
+func typeToBytes <T> (value: T) -> [UInt8] {
+    var v = value
+    return withUnsafePointer(&v) {
         Array(UnsafeBufferPointer(start: UnsafePointer<UInt8>($0), count: sizeof(T)))
     }
 }
@@ -46,7 +47,7 @@ func hexlify(data:NSData) -> String {
     
     for i in 0 ..< data.length {
         data.getBytes(&byte, range: NSMakeRange(i, 1))
-        s.appendFormat("%02X", byte)
+        s.appendFormat("%02x", byte)
     }
     
     return s as String
@@ -104,7 +105,7 @@ func assertThatFormatStartsWithAValidCharacter(format:String) {
 
 // akin to struct.calcsize(fmt)
 func numberOfBytesInFormat(format:String) -> Int {
-
+    
     var numberOfBytes = 0
     
     var n = 0 // repeat counter
@@ -164,11 +165,91 @@ func assertThatFormatHasTheSameSizeAsData(format:String, data:NSData) {
     }
 }
 
-//func pack(format:String, objects:[AnyObject]) -> NSData {
-//    // TODO
-//}
+func pack(format:String, _ objects:[AnyObject]) -> NSData {
+    
+    var isBigEndian = false
+    
+    var objectsQueue = Array(objects.reverse())
+    
+    var mutableFormat = format
+    
+    let mutableData = NSMutableData()
+    
+    var needsAlignment = false
+    
+    while mutableFormat.characters.count > 0 {
+        
+        let f = mutableFormat.removeAtIndex(mutableFormat.startIndex)
+        
+        if f == "<" {
+            isBigEndian = false
+            continue
+        }
+        
+        if f == ">" {
+            isBigEndian = true
+            continue
+        }
+        
+        if f == "x" {
+            needsAlignment = true
+            continue
+        }
+        
+        guard let o = objectsQueue.popLast() else { assertionFailure("not enough objects to pack"); return NSData() }
+        
+        var bytes : [UInt8] = []
+        
+        switch(f) {
+        case "b":
+            bytes = typeToBytes(Int8(truncatingBitPattern:o as! Int))
+        case "h":
+            bytes = typeToBytes(Int16(truncatingBitPattern:o as! Int))
+        case "i", "l":
+            bytes = typeToBytes(Int32(truncatingBitPattern:o as! Int))
+        case "q":
+            bytes = typeToBytes(Int64(o as! Int))
+        case "B":
+            bytes = typeToBytes(UInt8(truncatingBitPattern:o as! Int))
+        case "H":
+            bytes = typeToBytes(UInt16(truncatingBitPattern:o as! Int))
+        case "I", "L":
+            bytes = typeToBytes(UInt32(truncatingBitPattern:o as! Int))
+        case "Q":
+            bytes = typeToBytes(UInt64(o as! Int))
+        case "f":
+            bytes = typeToBytes(Float32(o as! Double))
+        case "d":
+            bytes = typeToBytes(Float64(o as! Double))
+            
+        default:
+            assertionFailure("Unsupported packing format: \(f)")
+        }
+        
+        if isBigEndian { bytes = bytes.reverse() }
+        var data = NSData(bytes)
+        
+        if needsAlignment {
+            if data.length < 4 {
+                while data.length < 4 {
+                    let zero = NSMutableData(data:unhexlify("00")!)
+                    zero.appendData(data)
+                    data = zero
+                }
+            }
+            assert(data.length == 4)
+        }
+        
+        needsAlignment = false
+        
+        mutableData.appendData(data)
+    }
+    
+    
+    return mutableData
+}
 
-func unpack(format:String, _ data:NSData) -> [AnyObject] {
+func unpack(format:String, _ data:NSData, _ stringEncoding:NSStringEncoding=NSWindowsCP1252StringEncoding) -> [AnyObject] {
     
     /*
      similar to unpack() in Python's struct module https://docs.python.org/2/library/struct.html but:
@@ -179,9 +260,9 @@ func unpack(format:String, _ data:NSData) -> [AnyObject] {
      */
     
     assert(Int(OSHostByteOrder()) == OSLittleEndian, "\(#file) assumes little endian, but host is big endian")
-
+    
     assertThatFormatStartsWithAValidCharacter(format)
-
+    
     assertThatFormatHasTheSameSizeAsData(format, data:data)
     
     var isBigEndian = false
@@ -212,7 +293,7 @@ func unpack(format:String, _ data:NSData) -> [AnyObject] {
             let sub = Array(bytes[loc..<loc+length])
             
             // TODO: don't hardcode string encoding
-            guard let s = NSString(bytes: sub, length: length, encoding: NSWindowsCP1252StringEncoding) else {
+            guard let s = NSString(bytes: sub, length: length, encoding: stringEncoding) else {
                 assertionFailure("-- not a string: \(sub)")
                 return []
             }
@@ -231,7 +312,7 @@ func unpack(format:String, _ data:NSData) -> [AnyObject] {
             var o : AnyObject?
             
             switch(c) {
-            
+                
             case "@":
                 isNative = true
             case "<", "=":

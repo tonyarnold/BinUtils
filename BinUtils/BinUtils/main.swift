@@ -14,7 +14,7 @@ let s = String(data: unhexlify("48656C6C6F")!, encoding: NSUTF8StringEncoding)
 assert(s == "Hello")
 
 let data = "Hello".dataUsingEncoding(NSUTF8StringEncoding)!
-assert(hexlify(data) == "48656C6C6F")
+assert(hexlify(data) == "48656c6c6f")
 
 let a = unpack(">hBsf", unhexlify("050001413fc00000")!)
 assert(a[0] as? Int == 1280)
