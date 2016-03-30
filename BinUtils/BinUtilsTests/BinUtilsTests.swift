@@ -63,7 +63,7 @@ class BinUtilsTests: XCTestCase {
         XCTAssertEqual(a[2] as? Double, 2.700000047683716)
     }
 
-    func testUnpack4() {
+    func testUnpack3() {
         let a = unpack("<2sss", unhexlify("41414141")!)
         
         XCTAssertEqual(a[0] as? String, "AA")
@@ -87,29 +87,29 @@ class BinUtilsTests: XCTestCase {
         XCTAssertEqual(a[0] as? Int, 216172782147338496)
     }
     
-    func testPack1() {
-        let data = pack("Ih", [123, 123])
-        XCTAssertEqual(data, unhexlify("7b0000007b00"))
+    func testPackLittleEndian() {
+        let data = pack("<Ih", [1, 2])
+        XCTAssertEqual(data, unhexlify("01000000 0200"))
     }
 
-    func testPack2() {
-        let data = pack("hhl", [1, 2, 3])
-        XCTAssertEqual(data, unhexlify("0100020003000000"))
+    func testPackBigEndian() {
+        let data = pack(">Ih", [1, 2])
+        XCTAssertEqual(data, unhexlify("00000001 0002"))
     }
 
-    func testPack3() {
-        let data = pack("<hhl", [1, 2, 3])
-        XCTAssertEqual(data, unhexlify("0100020003000000"))
+    func testPackDefaultLittleEndianAndNativeSize() {
+        let data = pack("Ih", [1, 2])
+        XCTAssertEqual(data, unhexlify("00000000 01000000 00000000 00000200"))
     }
 
-    func testPack4() {
-        let data = pack(">hhl", [1, 2, 3])
-        XCTAssertEqual(data, unhexlify("0001000200000003"))
+    func testPackPointer() {
+        let data = pack("@P", [1])
+        XCTAssertEqual(data, unhexlify("00000000 01000000"))
     }
-    
-    func testPackWithAlignment() {
+
+    func testPackWithPadding() {
         let data = pack("xh", [123])
-        XCTAssertEqual(data, unhexlify("00007b00"))
+        XCTAssertEqual(data, unhexlify("00000000 00007b00"))
     }
 }
 
