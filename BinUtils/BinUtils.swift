@@ -172,11 +172,11 @@ func assertThatFormatHasTheSameSizeAsData(format:String, data:NSData) {
 }
 
 /*
- pack() and unpack() similar to Python's struct module https://docs.python.org/2/library/struct.html BUT:
+ pack() and unpack() should behave as Python's struct module https://docs.python.org/2/library/struct.html BUT:
  - native size and alignment '@' is not supported
  - as a consequence, the byte order specifier character is mandatory and must be among "=<>!"
  - native byte order '=' assumes a little-endian system (eg. Intel x86)
- - Pascal strings format 'p' is not supported
+ - Pascal strings 'p' and native pointers 'P' are not supported
  */
 
 func pack(format:String, _ objects:[AnyObject], _ stringEncoding:NSStringEncoding=NSWindowsCP1252StringEncoding) -> NSData {

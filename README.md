@@ -52,3 +52,11 @@ f.closeFile()
 assert(b[0] as? Int == 64207)
 assert(b[1] as? Int == 65261)
 ```
+**pack() and unpack() caveats**
+
+pack() and unpack() should behave as Python's struct module https://docs.python.org/2/library/struct.html BUT:
+
+- native size and alignment `@` is not supported
+- as a consequence, the byte order specifier character is mandatory and must be among `=<>!`
+- native byte order `=` assumes a little-endian system (eg. Intel x86)
+- Pascal strings `p` and native pointers `P` are not supported
