@@ -24,7 +24,7 @@ assert(s == "Hello")
 
 **pack(fmt, [v1, v2, ...])**
 
-- return a string containing the values v1, v2, ... packed according to the given format
+- return data containing the values v1, v2, ... packed according to the given format
 - akin to [pack() in Python struct module](https://docs.python.org/2/library/struct.html#struct.pack)
 
 ```swift
@@ -34,7 +34,7 @@ assert(d == unhexlify("0100 02000000 03000000 617364 0000003f"))
 
 **unpack(fmt, string)**
 
-- unpack the string according to the given format
+- unpack the data according to the given format
 - akin to [unpack() in Python struct module](https://docs.python.org/2/library/struct.html#struct.unpack)
 
 ```swift
@@ -52,7 +52,7 @@ f.closeFile()
 assert(b[0] as? Int == 64207)
 assert(b[1] as? Int == 65261)
 ```
-**pack() and unpack() caveats**
+**caveats**
 
 pack() and unpack() should behave as Python's struct module https://docs.python.org/2/library/struct.html BUT:
 
