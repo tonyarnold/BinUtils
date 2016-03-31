@@ -181,7 +181,7 @@ func assertThatFormatHasTheSameSizeAsData(format:String, data:NSData) {
 
 func pack(format:String, _ objects:[AnyObject], _ stringEncoding:NSStringEncoding=NSWindowsCP1252StringEncoding) -> NSData {
     
-    var objectsQueue = Array(objects.reverse())
+    var objectsQueue = objects
     
     var mutableFormat = format
     
@@ -217,7 +217,7 @@ func pack(format:String, _ objects:[AnyObject], _ stringEncoding:NSStringEncodin
         var o : AnyObject = 0
 
         if c == "s" {
-            o = objectsQueue.popLast()!
+            o = objectsQueue.removeFirst()
 
             guard let stringData = (o as! String).dataUsingEncoding(stringEncoding) else { assertionFailure(); return NSData() }
             var bytes = stringData.bytesArray()
@@ -245,7 +245,7 @@ func pack(format:String, _ objects:[AnyObject], _ stringEncoding:NSStringEncodin
             var bytes : [UInt8] = []
 
             if c != "x" {
-                o = objectsQueue.popLast()!
+                o = objectsQueue.removeFirst()
             }
             
             switch(c) {
