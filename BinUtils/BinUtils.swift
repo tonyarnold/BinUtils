@@ -8,6 +8,13 @@
 
 import Foundation
 
+protocol UnpackedType {}
+
+extension NSString: UnpackedType {}
+extension Bool: UnpackedType {}
+extension Int: UnpackedType {}
+extension Double: UnpackedType {}
+
 extension String {
     subscript (from:Int, to:Int) -> String {
         return (self as NSString).substringWithRange(NSMakeRange(from, to-from))
@@ -215,27 +222,27 @@ func pack(format:String, _ objects:[AnyObject], _ stringEncoding:NSStringEncodin
         }
         
         var o : AnyObject = 0
-
+        
         if c == "s" {
             o = objectsQueue.removeFirst()
-
+            
             guard let stringData = (o as! String).dataUsingEncoding(stringEncoding) else { assertionFailure(); return NSData() }
             var bytes = stringData.bytesArray()
-
+            
             let expectedSize = max(1, n)
             
             // pad ...
             while bytes.count < expectedSize { bytes.append(0x00) }
-
+            
             // ... or trunk
             if bytes.count > expectedSize { bytes = Array(bytes[0..<expectedSize]) }
-
+            
             assert(bytes.count == expectedSize)
             
             if isBigEndian { bytes = bytes.reverse() }
             let data = NSData(bytes)
             mutableData.appendData(data)
-
+            
             n = 0
             continue
         }
@@ -243,7 +250,7 @@ func pack(format:String, _ objects:[AnyObject], _ stringEncoding:NSStringEncodin
         for _ in 0..<max(n,1) {
             
             var bytes : [UInt8] = []
-
+            
             if c != "x" {
                 o = objectsQueue.removeFirst()
             }
@@ -293,7 +300,7 @@ func pack(format:String, _ objects:[AnyObject], _ stringEncoding:NSStringEncodin
     return mutableData
 }
 
-func unpack(format:String, _ data:NSData, _ stringEncoding:NSStringEncoding=NSWindowsCP1252StringEncoding) -> [AnyObject] {
+func unpack(format:String, _ data:NSData, _ stringEncoding:NSStringEncoding=NSWindowsCP1252StringEncoding) -> [UnpackedType] {
     
     assert(Int(OSHostByteOrder()) == OSLittleEndian, "\(#file) assumes little endian, but host is big endian")
     
@@ -301,7 +308,7 @@ func unpack(format:String, _ data:NSData, _ stringEncoding:NSStringEncoding=NSWi
     
     assertThatFormatHasTheSameSizeAsData(format, data:data)
     
-    var a : [AnyObject] = []
+    var a : [UnpackedType] = []
     
     var loc = 0
     
@@ -343,12 +350,15 @@ func unpack(format:String, _ data:NSData, _ stringEncoding:NSStringEncoding=NSWi
         
         for _ in 0..<max(n,1) {
             
-            var o : AnyObject?
+            var o : UnpackedType?
             
             switch(c) {
                 
             case "c":
-                o = NSString(bytes: [bytes[loc]], length: 1, encoding: NSUTF8StringEncoding); loc += 1
+                let optionalString = NSString(bytes: [bytes[loc]], length: 1, encoding: NSUTF8StringEncoding)
+                loc += 1
+                guard let s = optionalString else { assertionFailure(); return [] }
+                o = s
             case "b":
                 let r = readIntegerType(Int8.self, bytes:bytes, loc:&loc)
                 o = Int(r)
@@ -394,7 +404,7 @@ func unpack(format:String, _ data:NSData, _ stringEncoding:NSStringEncoding=NSWi
                 assertionFailure("-- unsupported format \(c)")
             }
             
-            if let o_ = o { a.append(o_) }
+            if let o = o { a.append(o) }
         }
         
         n = 0
