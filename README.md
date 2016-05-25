@@ -60,3 +60,33 @@ pack() and unpack() should behave as Python's struct module https://docs.python.
 - as a consequence, the byte order specifier character is mandatory and must be among `=<>!`
 - native byte order `=` assumes a little-endian system (eg. Intel x86)
 - Pascal strings `p` and native pointers `P` are not supported
+
+**Byte Order Format**
+
+| Character | Byte Order |
+|---|---|
+| = | little-endian |
+| < | little-endian |
+| > | big-endian |
+| ! | network (big-endian) |
+
+**Format Characters**
+
+| Format | C Type | Swift Type | Size |
+|---|---|---|---|
+| x | pad byte | - | 1 |
+| c | char | String of length 1 | 1 |
+| b | signed char | Int8 | 1 |
+| B | unsigned char | UInt8 | 1 |
+| ? | _Bool | Bool | 1 |
+| h | short | Int16 | 2 |
+| H | unsigned short | UInt16 | 2 |
+| i | int | Int32 | 4 |
+| I | unsigned int | UInt32 | 4 |
+| l | long | Int32 | 4 |
+| L | unsigned long | UInt32 | 4 |
+| q | long long | Int64 | 8 |
+| Q | unsigned long long | Int64 | 8 |
+| f | float | Float32 | 4 |
+| d | double | Float64 | 8 |
+| s | char[] | String |   |
