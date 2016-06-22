@@ -168,14 +168,15 @@ func numberOfBytesInFormat(format:String) -> Int {
     return numberOfBytes
 }
 
-func assertThatFormatHasTheSameSizeAsData(format:String, data:NSData) {
+func formatDoesMatchDataLength(format:String, data:NSData) -> Bool {
     let sizeAccordingToFormat = numberOfBytesInFormat(format)
     let dataLength = data.length
-    guard sizeAccordingToFormat == dataLength else {
+    if sizeAccordingToFormat != dataLength {
         print("format \"\(format)\" expects \(sizeAccordingToFormat) bytes but data is \(dataLength) bytes")
-        assert(sizeAccordingToFormat == dataLength)
-        return
+        return false
     }
+    
+    return true
 }
 
 /*
@@ -185,6 +186,11 @@ func assertThatFormatHasTheSameSizeAsData(format:String, data:NSData) {
  - native byte order '=' assumes a little-endian system (eg. Intel x86)
  - Pascal strings 'p' and native pointers 'P' are not supported
  */
+
+enum BinUtilsError: ErrorType {
+    case FormatDoesMatchDataLength(format:String, dataSize:Int)
+    case UnsupportedFormat(character:Character)
+}
 
 func pack(format:String, _ objects:[AnyObject], _ stringEncoding:NSStringEncoding=NSWindowsCP1252StringEncoding) -> NSData {
     
@@ -300,13 +306,15 @@ func pack(format:String, _ objects:[AnyObject], _ stringEncoding:NSStringEncodin
     return mutableData
 }
 
-func unpack(format:String, _ data:NSData, _ stringEncoding:NSStringEncoding=NSWindowsCP1252StringEncoding) -> [UnpackedType] {
+func unpack(format:String, _ data:NSData, _ stringEncoding:NSStringEncoding=NSWindowsCP1252StringEncoding) throws -> [UnpackedType] {
     
     assert(Int(OSHostByteOrder()) == OSLittleEndian, "\(#file) assumes little endian, but host is big endian")
     
     let isBigEndian = isBigEndianFromMandatoryByteOrderFirstCharacter(format)
     
-    assertThatFormatHasTheSameSizeAsData(format, data:data)
+    if formatDoesMatchDataLength(format, data: data) == false {
+        throw BinUtilsError.FormatDoesMatchDataLength(format:format, dataSize:data.length)
+    }
     
     var a : [UnpackedType] = []
     
@@ -401,7 +409,7 @@ func unpack(format:String, _ data:NSData, _ stringEncoding:NSStringEncoding=NSWi
             case " ":
                 ()
             default:
-                assertionFailure("-- unsupported format \(c)")
+                throw BinUtilsError.UnsupportedFormat(character:c)
             }
             
             if let o = o { a.append(o) }

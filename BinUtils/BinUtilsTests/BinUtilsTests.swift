@@ -36,7 +36,7 @@ class BinUtilsTests: XCTestCase {
     func testUnpackWithFile() {
         let path = "/bin/ls"
         if let f = NSFileHandle(forReadingAtPath: path) {
-            let a = unpack("<2H", f.readDataOfLength(4))
+            let a = try! unpack("<2H", f.readDataOfLength(4))
             f.closeFile()
          
             XCTAssertEqual(a[0] as? Int, 64207)
@@ -47,7 +47,7 @@ class BinUtilsTests: XCTestCase {
     }
 
     func testUnpack1() {
-        let a = unpack(">hBsf", unhexlify("050001413fc00000")!)
+        let a = try! unpack(">hBsf", unhexlify("050001413fc00000")!)
         
         XCTAssertEqual(a[0] as? Int, 1280)
         XCTAssertEqual(a[1] as? Int, 1)
@@ -56,7 +56,7 @@ class BinUtilsTests: XCTestCase {
     }
 
     func testUnpack2() {
-        let a = unpack("<I 2s f", unhexlify("010000006162cdcc2c40")!)
+        let a = try! unpack("<I 2s f", unhexlify("010000006162cdcc2c40")!)
         
         XCTAssertEqual(a[0] as? Int, 1)
         XCTAssertEqual(a[1] as? String, "ab")
@@ -64,7 +64,7 @@ class BinUtilsTests: XCTestCase {
     }
 
     func testUnpack3() {
-        let a = unpack("<2sss", unhexlify("41414141")!)
+        let a = try! unpack("<2sss", unhexlify("41414141")!)
         
         XCTAssertEqual(a[0] as? String, "AA")
         XCTAssertEqual(a[1] as? String, "A")
@@ -130,7 +130,7 @@ class BinUtilsTests: XCTestCase {
     func testPackUnpackNetworkOrder() {
         // http://effbot.org/librarybook/struct.htm
         let data = pack("!ihb", [1, 2, 3])
-        let a = unpack("!ihb", data)
+        let a = try! unpack("!ihb", data)
         XCTAssertEqual(a[0] as? Int, 1)
         XCTAssertEqual(a[1] as? Int, 2)
         XCTAssertEqual(a[2] as? Int, 3)
