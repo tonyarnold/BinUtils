@@ -71,6 +71,11 @@ class BinUtilsTests: XCTestCase {
         XCTAssertEqual(a[2] as? String, "A")
     }
 
+    func testUnpackNothing() {
+        let a = try! unpack("<", NSData())
+        assert(a.count == 0)
+    }
+    
     func testFormatSizes() {
 
         XCTAssertEqual(0, numberOfBytesInFormat(""))
