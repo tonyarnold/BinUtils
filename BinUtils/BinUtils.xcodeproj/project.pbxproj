@@ -139,9 +139,11 @@
 				TargetAttributes = {
 					036803D31C96DF2F00CC95D7 = {
 						CreatedOnToolsVersion = 7.2.1;
+						LastSwiftMigration = 0800;
 					};
 					036803E11C96DF5600CC95D7 = {
 						CreatedOnToolsVersion = 7.2.1;
+						LastSwiftMigration = 0800;
 					};
 				};
 			};
@@ -279,6 +281,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -286,6 +289,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};
@@ -297,6 +301,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = ch.seriot.BinUtilsTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -308,6 +313,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = ch.seriot.BinUtilsTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};
@@ -330,6 +336,7 @@
 				036803DD1C96DF2F00CC95D7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		036803E71C96DF5600CC95D7 /* Build configuration list for PBXNativeTarget "BinUtilsTests" */ = {
 			isa = XCConfigurationList;
@@ -338,6 +345,7 @@
 				036803E91C96DF5600CC95D7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

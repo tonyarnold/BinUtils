@@ -21,7 +21,7 @@ class BinUtilsTests: XCTestCase {
     }
 
     func testUnhexlify() {
-        let s = String(data: unhexlify("48656C6C6F")!, encoding: NSUTF8StringEncoding)
+        let s = String(data: unhexlify("48656C6C6F")!, encoding: String.Encoding.utf8)
         XCTAssertEqual(s, "Hello")
     }
 
@@ -30,13 +30,13 @@ class BinUtilsTests: XCTestCase {
         
         let s2 = hexlify(unhexlify(s1)!)
         
-        XCTAssertEqual(s1.lowercaseString, s2)
+        XCTAssertEqual(s1.lowercased(), s2)
     }
 
     func testUnpackWithFile() {
         let path = "/bin/ls"
-        if let f = NSFileHandle(forReadingAtPath: path) {
-            let a = try! unpack("<2H", f.readDataOfLength(4))
+        if let f = FileHandle(forReadingAtPath: path) {
+            let a = try! unpack("<2H", f.readData(ofLength: 4))
             f.closeFile()
          
             XCTAssertEqual(a[0] as? Int, 64207)
@@ -72,7 +72,7 @@ class BinUtilsTests: XCTestCase {
     }
 
     func testUnpackNothing() {
-        let a = try! unpack("<", NSData())
+        let a = try! unpack("<", Data())
         assert(a.count == 0)
     }
     

@@ -10,10 +10,10 @@ import Foundation
 
 print("Hello, World!")
 
-let s = String(data: unhexlify("48656C6C6F")!, encoding: NSUTF8StringEncoding)
+let s = String(data: unhexlify("48656C6C6F")!, encoding: String.Encoding.utf8)
 assert(s == "Hello")
 
-let data = "Hello".dataUsingEncoding(NSUTF8StringEncoding)!
+let data = "Hello".data(using: String.Encoding.utf8)!
 assert(hexlify(data) == "48656c6c6f")
 
 let a = try! unpack(">hBsf", unhexlify("0500 01 41 3fc00000")!)
@@ -22,8 +22,8 @@ assert(a[1] as? Int == 1)
 assert(a[2] as? String == "A")
 assert(a[3] as? Double == 1.5)
 
-let f = NSFileHandle(forReadingAtPath: "/bin/ls")!
-let b = try! unpack("<2H", f.readDataOfLength(4))
+let f = FileHandle(forReadingAtPath: "/bin/ls")!
+let b = try! unpack("<2H", f.readData(ofLength: 4))
 f.closeFile()
 assert(b[0] as? Int == 64207)
 assert(b[1] as? Int == 65261)
