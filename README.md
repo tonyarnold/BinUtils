@@ -8,7 +8,7 @@ Swift functions to ease working with binary formats
 - for iOS and OS X
 
 ```swift
-let data = "Hello".dataUsingEncoding(NSUTF8StringEncoding)!
+guard let data = "Hello".dataUsingEncoding(.utf8) else { return }
 assert(hexlify(data) == "48656C6C6F")
 ```
 
@@ -18,7 +18,7 @@ assert(hexlify(data) == "48656C6C6F")
 - akin to [unhexlify() in Python binascii module](https://docs.python.org/2/library/binascii.html#binascii.unhexlify)
 
 ```swift
-let s = String(data: unhexlify("48656C6C6F")!, encoding: NSUTF8StringEncoding)
+let s = String(data: unhexlify("48656C6C6F")!, encoding: .utf8)
 assert(s == "Hello")
 ```
 
@@ -46,7 +46,7 @@ assert(a[3] as? Double == 1.5)
 ```
 
 ```swift
-let f = NSFileHandle(forReadingAtPath: "/bin/ls")!
+let f = FileHandle(forReadingAtPath: "/bin/ls")!
 let b = unpack("<2H", f.readDataOfLength(4))
 f.closeFile()
 assert(b[0] as? Int == 64207)

@@ -21,7 +21,7 @@ class BinUtilsTests: XCTestCase {
     }
 
     func testUnhexlify() {
-        let s = String(data: unhexlify("48656C6C6F")!, encoding: String.Encoding.utf8)
+        let s = String(data: unhexlify("48656C6C6F")!, encoding: .utf8)
         XCTAssertEqual(s, "Hello")
     }
 
