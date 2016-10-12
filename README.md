@@ -8,7 +8,7 @@ Swift functions to ease working with binary formats
 - for iOS and OS X
 
 ```swift
-guard let data = "Hello".dataUsingEncoding(.utf8) else { return }
+let data = "Hello".dataUsingEncoding(.utf8)!
 assert(hexlify(data) == "48656C6C6F")
 ```
 
