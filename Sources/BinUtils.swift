@@ -10,7 +10,7 @@ import Foundation
 
 // MARK: protocol UnpackedType
 
-protocol Unpackable {}
+public protocol Unpackable {}
 
 extension NSString: Unpackable {}
 extension Bool: Unpackable {}
@@ -74,7 +74,7 @@ extension Data {
 
 // MARK: functions
 
-func hexlify(_ data:Data) -> String {
+public func hexlify(_ data:Data) -> String {
     
     // similar to hexlify() in Python's binascii module
     // https://docs.python.org/2/library/binascii.html
@@ -90,7 +90,7 @@ func hexlify(_ data:Data) -> String {
     return s as String
 }
 
-func unhexlify(_ string:String) -> Data? {
+public func unhexlify(_ string:String) -> Data? {
     
     // similar to unhexlify() in Python's binascii module
     // https://docs.python.org/2/library/binascii.html
@@ -217,12 +217,12 @@ func formatDoesMatchDataLength(_ format:String, data:Data) -> Bool {
  - Pascal strings 'p' and native pointers 'P' are not supported
  */
 
-enum BinUtilsError: Error {
+public enum BinUtilsError: Error {
     case formatDoesMatchDataLength(format:String, dataSize:Int)
     case unsupportedFormat(character:Character)
 }
 
-func pack(_ format:String, _ objects:[Any], _ stringEncoding:String.Encoding=String.Encoding.windowsCP1252) -> Data {
+public func pack(_ format:String, _ objects:[Any], _ stringEncoding:String.Encoding=String.Encoding.windowsCP1252) -> Data {
     
     var objectsQueue = objects
     
@@ -336,7 +336,7 @@ func pack(_ format:String, _ objects:[Any], _ stringEncoding:String.Encoding=Str
     return mutableData
 }
 
-func unpack(_ format:String, _ data:Data, _ stringEncoding:String.Encoding=String.Encoding.windowsCP1252) throws -> [Unpackable] {
+public func unpack(_ format:String, _ data:Data, _ stringEncoding:String.Encoding=String.Encoding.windowsCP1252) throws -> [Unpackable] {
     
     assert(Int(OSHostByteOrder()) == OSLittleEndian, "\(#file) assumes little endian, but host is big endian")
     
