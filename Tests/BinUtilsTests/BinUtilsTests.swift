@@ -7,6 +7,7 @@
 //
 
 import XCTest
+@testable import BinUtils
 
 class BinUtilsTests: XCTestCase {
     
