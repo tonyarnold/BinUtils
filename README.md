@@ -1,6 +1,14 @@
 # BinUtils
 Swift functions to ease working with binary formats
 
+**Installation**
+
+Either copy `BinUtils.swift` into your project, or use Swift Package Manager by adding the following dependency to your `Package.swift`:
+
+    dependencies: [
+        .Package(url: "https://github.com/nst/BinUtils.git", majorVersion: 0, minor: 1),
+    ]
+
 **hexlify(data)**
 
 - return the hexadecimal representation of the binary data
