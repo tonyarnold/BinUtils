@@ -1,0 +1,220 @@
+// !$*UTF8*$!
+{
+    archiveVersion = 1;
+    classes = {};
+    objectVersion = 46;
+    rootObject = __RootObject_;
+    objects = {
+        __RootObject_ = {
+            isa = PBXProject;
+            attributes = {LastUpgradeCheck = 9999;};
+            buildConfigurationList = ___RootConfs_;
+            compatibilityVersion = 'Xcode 3.2';
+            developmentRegion = English;
+            hasScannedForEncodings = 0;
+            knownRegions = (en);
+            mainGroup = ___RootGroup_;
+            productRefGroup = ____Products_;
+            projectDirPath = '';
+            projectRoot = '';
+            targets = (______Target_BinUtils, ______Target_BinUtilsTests);
+        };
+        '__PBXFileRef_Package.swift' = {
+            isa = PBXFileReference;
+            lastKnownFileType = sourcecode.swift;
+            path = 'Package.swift';
+            sourceTree = '<group>';
+        };
+        ___RootGroup_ = {
+            isa = PBXGroup;
+            children = ('__PBXFileRef_Package.swift', _____Configs_, _____Sources_,  Dependencies_, _______Tests_, ____Products_);
+            sourceTree = '<group>';
+        };
+        _______Group_BinUtils = {
+            isa = PBXGroup;
+            name = 'BinUtils';
+            path = 'Sources';
+            sourceTree = '<group>';
+            children = ('__PBXFileRef_Sources/BinUtils.swift');
+        };
+        '__PBXFileRef_Sources/BinUtils.swift' = {
+            isa = PBXFileReference;
+            lastKnownFileType = sourcecode.swift;
+            path = 'BinUtils.swift';
+            sourceTree = '<group>';
+        };
+        ______Target_BinUtils = {
+            isa = PBXNativeTarget;
+            buildConfigurationList = _______Confs_BinUtils;
+            buildPhases = (CompilePhase_BinUtils, ___LinkPhase_BinUtils);
+            buildRules = ();
+            dependencies = ();
+            name = 'BinUtils';
+            productName = BinUtils;
+            productReference = _____Product_BinUtils;
+            productType = 'com.apple.product-type.framework';
+        };
+        _____Product_BinUtils = {
+            isa = PBXFileReference;
+            explicitFileType = 'wrapper.framework';
+            path = 'BinUtils.framework';
+            sourceTree = BUILT_PRODUCTS_DIR;
+        };
+        CompilePhase_BinUtils = {
+            isa = PBXSourcesBuildPhase;
+            files = ('__src_cc_ref_Sources/BinUtils.swift');
+            runOnlyForDeploymentPostprocessing = 0;
+        };
+        '__src_cc_ref_Sources/BinUtils.swift' = {
+            isa = PBXBuildFile;
+            fileRef = '__PBXFileRef_Sources/BinUtils.swift';
+        };
+        ___LinkPhase_BinUtils = {
+            isa = PBXFrameworksBuildPhase;
+            files = ();
+            runOnlyForDeploymentPostprocessing = 0;
+        };
+        _______Confs_BinUtils = {
+            isa = XCConfigurationList;
+            buildConfigurations = (___DebugConf_BinUtils, _ReleaseConf_BinUtils);
+            defaultConfigurationIsVisible = 0;
+            defaultConfigurationName = Debug;
+        };
+        ___DebugConf_BinUtils = {
+            isa = XCBuildConfiguration;
+            buildSettings = { SWIFT_VERSION = '3.0'; LD_RUNPATH_SEARCH_PATHS = '$(TOOLCHAIN_DIR)/usr/lib/swift/macosx'; PRODUCT_MODULE_NAME = '$(TARGET_NAME:c99extidentifier)'; ENABLE_TESTABILITY = 'YES'; OTHER_SWIFT_FLAGS = '$(inherited)'; INFOPLIST_FILE = 'BinUtils.xcodeproj/BinUtils_Info.plist'; FRAMEWORK_SEARCH_PATHS = '$(PLATFORM_DIR)/Developer/Library/Frameworks'; SWIFT_OPTIMIZATION_LEVEL = '-Onone'; PRODUCT_BUNDLE_IDENTIFIER = 'BinUtils'; PRODUCT_NAME = '$(TARGET_NAME:c99extidentifier)'; OTHER_LDFLAGS = '$(inherited)'; };
+            name = Debug;
+        };
+        _ReleaseConf_BinUtils = {
+            isa = XCBuildConfiguration;
+            buildSettings = { SWIFT_VERSION = '3.0'; LD_RUNPATH_SEARCH_PATHS = '$(TOOLCHAIN_DIR)/usr/lib/swift/macosx'; PRODUCT_MODULE_NAME = '$(TARGET_NAME:c99extidentifier)'; ENABLE_TESTABILITY = 'YES'; OTHER_SWIFT_FLAGS = '$(inherited)'; INFOPLIST_FILE = 'BinUtils.xcodeproj/BinUtils_Info.plist'; FRAMEWORK_SEARCH_PATHS = '$(PLATFORM_DIR)/Developer/Library/Frameworks'; PRODUCT_BUNDLE_IDENTIFIER = 'BinUtils'; PRODUCT_NAME = '$(TARGET_NAME:c99extidentifier)'; OTHER_LDFLAGS = '$(inherited)'; };
+            name = Release;
+        };
+        __Dependency_BinUtils = {
+            isa = PBXTargetDependency;
+            target = ______Target_BinUtils;
+        };
+        _______Group_BinUtilsTests = {
+            isa = PBXGroup;
+            name = 'BinUtilsTests';
+            path = 'Tests/BinUtilsTests';
+            sourceTree = '<group>';
+            children = ('__PBXFileRef_Tests/BinUtilsTests/BinUtilsTests.swift');
+        };
+        '__PBXFileRef_Tests/BinUtilsTests/BinUtilsTests.swift' = {
+            isa = PBXFileReference;
+            lastKnownFileType = sourcecode.swift;
+            path = 'BinUtilsTests.swift';
+            sourceTree = '<group>';
+        };
+        ______Target_BinUtilsTests = {
+            isa = PBXNativeTarget;
+            buildConfigurationList = _______Confs_BinUtilsTests;
+            buildPhases = (CompilePhase_BinUtilsTests, ___LinkPhase_BinUtilsTests);
+            buildRules = ();
+            dependencies = (__Dependency_BinUtils);
+            name = 'BinUtilsTests';
+            productName = BinUtilsTests;
+            productReference = _____Product_BinUtilsTests;
+            productType = 'com.apple.product-type.bundle.unit-test';
+        };
+        _____Product_BinUtilsTests = {
+            isa = PBXFileReference;
+            explicitFileType = 'compiled.mach-o.wrapper.cfbundle';
+            path = 'BinUtilsTests.xctest';
+            sourceTree = BUILT_PRODUCTS_DIR;
+        };
+        CompilePhase_BinUtilsTests = {
+            isa = PBXSourcesBuildPhase;
+            files = ('__src_cc_ref_Tests/BinUtilsTests/BinUtilsTests.swift');
+            runOnlyForDeploymentPostprocessing = 0;
+        };
+        '__src_cc_ref_Tests/BinUtilsTests/BinUtilsTests.swift' = {
+            isa = PBXBuildFile;
+            fileRef = '__PBXFileRef_Tests/BinUtilsTests/BinUtilsTests.swift';
+        };
+        ___LinkPhase_BinUtilsTests = {
+            isa = PBXFrameworksBuildPhase;
+            files = (_LinkFileRef_BinUtils_via_BinUtilsTests);
+            runOnlyForDeploymentPostprocessing = 0;
+        };
+        _LinkFileRef_BinUtils_via_BinUtilsTests = {
+            isa = PBXBuildFile;
+            fileRef = _____Product_BinUtils;
+        };
+        _______Confs_BinUtilsTests = {
+            isa = XCConfigurationList;
+            buildConfigurations = (___DebugConf_BinUtilsTests, _ReleaseConf_BinUtilsTests);
+            defaultConfigurationIsVisible = 0;
+            defaultConfigurationName = Debug;
+        };
+        ___DebugConf_BinUtilsTests = {
+            isa = XCBuildConfiguration;
+            buildSettings = { LD_RUNPATH_SEARCH_PATHS = '@loader_path/../Frameworks'; FRAMEWORK_SEARCH_PATHS = '$(PLATFORM_DIR)/Developer/Library/Frameworks'; OTHER_SWIFT_FLAGS = '$(inherited)'; INFOPLIST_FILE = 'BinUtils.xcodeproj/BinUtilsTests_Info.plist'; SWIFT_OPTIMIZATION_LEVEL = '-Onone'; EMBEDDED_CONTENT_CONTAINS_SWIFT = 'YES'; OTHER_LDFLAGS = '$(inherited)'; SWIFT_VERSION = '3.0'; };
+            name = Debug;
+        };
+        _ReleaseConf_BinUtilsTests = {
+            isa = XCBuildConfiguration;
+            buildSettings = { LD_RUNPATH_SEARCH_PATHS = '@loader_path/../Frameworks'; FRAMEWORK_SEARCH_PATHS = '$(PLATFORM_DIR)/Developer/Library/Frameworks'; OTHER_SWIFT_FLAGS = '$(inherited)'; INFOPLIST_FILE = 'BinUtils.xcodeproj/BinUtilsTests_Info.plist'; EMBEDDED_CONTENT_CONTAINS_SWIFT = 'YES'; OTHER_LDFLAGS = '$(inherited)'; SWIFT_VERSION = '3.0'; };
+            name = Release;
+        };
+        __Dependency_BinUtilsTests = {
+            isa = PBXTargetDependency;
+            target = ______Target_BinUtilsTests;
+        };
+        '__PBXFileRef_BinUtils.xcodeproj/Configs/Project.xcconfig' = {
+            isa = PBXFileReference;
+            lastKnownFileType = text.xcconfig;
+            path = 'BinUtils.xcodeproj/Configs/Project.xcconfig';
+            sourceTree = '<group>';
+        };
+        _____Configs_ = {
+            isa = PBXGroup;
+            children = ('__PBXFileRef_BinUtils.xcodeproj/Configs/Project.xcconfig');
+            name = Configs;
+            sourceTree = '<group>';
+        };
+        _____Sources_ = {
+            isa = PBXGroup;
+            children = (_______Group_BinUtils);
+            name = Sources;
+            sourceTree = '<group>';
+        };
+        _______Tests_ = {
+            isa = PBXGroup;
+            children = (_______Group_BinUtilsTests);
+            name = Tests;
+            sourceTree = '<group>';
+        };
+       TestProducts_ = {
+            isa = PBXGroup;
+            children = (_____Product_BinUtilsTests);
+            name = Tests;
+            sourceTree = '<group>';
+        };
+        ____Products_ = {
+            isa = PBXGroup;
+            children = (TestProducts_, _____Product_BinUtils);
+            name = Products;
+            sourceTree = '<group>';
+        };
+        _______Debug_ = {
+            isa = XCBuildConfiguration;
+            baseConfigurationReference = '__PBXFileRef_BinUtils.xcodeproj/Configs/Project.xcconfig';
+            buildSettings = {};
+            name = Debug;
+        };
+        _____Release_ = {
+            isa = XCBuildConfiguration;
+            baseConfigurationReference = '__PBXFileRef_BinUtils.xcodeproj/Configs/Project.xcconfig';
+            buildSettings = {};
+            name = Release;
+        };
+        ___RootConfs_ = {
+            isa = XCConfigurationList;
+            buildConfigurations = (_______Debug_, _____Release_);
+            defaultConfigurationIsVisible = 0;
+            defaultConfigurationName = Debug;
+        };
+    };
+}
