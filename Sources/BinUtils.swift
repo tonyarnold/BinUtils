@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import CoreFoundation
 
 // MARK: protocol UnpackedType
 
@@ -58,7 +59,7 @@ extension Float64 : DataConvertible { }
 
 extension String {
     subscript (from:Int, to:Int) -> String {
-        return (self as NSString).substring(with: NSMakeRange(from, to-from))
+        return NSString(string: self).substring(with: NSMakeRange(from, to-from))
     }
 }
 
@@ -83,7 +84,7 @@ public func hexlify(_ data:Data) -> String {
     var byte: UInt8 = 0
     
     for i in 0 ..< data.count {
-        (data as NSData).getBytes(&byte, range: NSMakeRange(i, 1))
+        NSData(data: data).getBytes(&byte, range: NSMakeRange(i, 1))
         s = s.appendingFormat("%02x", byte)
     }
     
@@ -133,7 +134,7 @@ func isBigEndianFromMandatoryByteOrderFirstCharacter(_ format:String) -> Bool {
     
     guard let firstChar = format.characters.first else { assertionFailure("empty format"); return false }
     
-    let s = String(firstChar) as NSString
+    let s = NSString(string: String(firstChar))
     let c = s.substring(to: 1)
     
     if c == "@" { assertionFailure("native size and alignment is unsupported") }
@@ -338,7 +339,7 @@ public func pack(_ format:String, _ objects:[Any], _ stringEncoding:String.Encod
 
 public func unpack(_ format:String, _ data:Data, _ stringEncoding:String.Encoding=String.Encoding.windowsCP1252) throws -> [Unpackable] {
     
-    assert(Int(OSHostByteOrder()) == OSLittleEndian, "\(#file) assumes little endian, but host is big endian")
+    assert(CFByteOrderGetCurrent() == 1 /* CFByteOrderLittleEndian */, "\(#file) assumes little endian, but host is big endian")
     
     let isBigEndian = isBigEndianFromMandatoryByteOrderFirstCharacter(format)
     

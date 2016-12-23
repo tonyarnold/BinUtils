@@ -6,16 +6,17 @@
 //  Copyright © 2016 Nicolas Seriot. All rights reserved.
 //
 
+import Foundation
 import XCTest
 @testable import BinUtils
 
 class BinUtilsTests: XCTestCase {
-    
+
     override func setUp() {
         super.setUp()
         // Put setup code here. This method is called before the invocation of each test method in the class.
     }
-    
+
     override func tearDown() {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
         super.tearDown()
@@ -28,9 +29,9 @@ class BinUtilsTests: XCTestCase {
 
     func testHexlifyUnhexlify() {
         let s1 = "ABcdEF"
-        
+
         let s2 = hexlify(unhexlify(s1)!)
-        
+
         XCTAssertEqual(s1.lowercased(), s2)
     }
 
@@ -39,7 +40,7 @@ class BinUtilsTests: XCTestCase {
         if let f = FileHandle(forReadingAtPath: path) {
             let a = try! unpack("<2H", f.readData(ofLength: 4))
             f.closeFile()
-         
+
             XCTAssertEqual(a[0] as? Int, 64207)
             XCTAssertEqual(a[1] as? Int, 65261)
         } else {
@@ -49,7 +50,7 @@ class BinUtilsTests: XCTestCase {
 
     func testUnpack1() {
         let a = try! unpack(">hBsf", unhexlify("050001413fc00000")!)
-        
+
         XCTAssertEqual(a[0] as? Int, 1280)
         XCTAssertEqual(a[1] as? Int, 1)
         XCTAssertEqual(a[2] as? String, "A")
@@ -58,7 +59,7 @@ class BinUtilsTests: XCTestCase {
 
     func testUnpack2() {
         let a = try! unpack("<I 2s f", unhexlify("010000006162cdcc2c40")!)
-        
+
         XCTAssertEqual(a[0] as? Int, 1)
         XCTAssertEqual(a[1] as? String, "ab")
         XCTAssertEqual(a[2] as? Double, 2.700000047683716)
@@ -66,7 +67,7 @@ class BinUtilsTests: XCTestCase {
 
     func testUnpack3() {
         let a = try! unpack("<2sss", unhexlify("41414141")!)
-        
+
         XCTAssertEqual(a[0] as? String, "AA")
         XCTAssertEqual(a[1] as? String, "A")
         XCTAssertEqual(a[2] as? String, "A")
@@ -76,7 +77,7 @@ class BinUtilsTests: XCTestCase {
         let a = try! unpack("<", Data())
         assert(a.count == 0)
     }
-    
+
     func testFormatSizes() {
 
         XCTAssertEqual(0, numberOfBytesInFormat(""))
@@ -87,7 +88,7 @@ class BinUtilsTests: XCTestCase {
         XCTAssertEqual(6, numberOfBytesInFormat(">5sb"))
         XCTAssertEqual(8, numberOfBytesInFormat(">hBsf"))
     }
-        
+
     func testPackLittleEndian() {
         let data = pack("<Ih", [1, 2])
         XCTAssertEqual(data, unhexlify("01000000 0200"))
@@ -127,12 +128,12 @@ class BinUtilsTests: XCTestCase {
         let data = pack("<2s2s", ["as", "df"])
         XCTAssertEqual(data, unhexlify("6173 6466"))
     }
-    
+
     func testPack() {
         let data = pack("<h2I3sf", [1, 2, 3, "asd", 0.5])
         XCTAssertEqual(data, unhexlify("0100 02000000 03000000 617364 0000003f"))
     }
-    
+
     func testPackUnpackNetworkOrder() {
         // http://effbot.org/librarybook/struct.htm
         let data = pack("!ihb", [1, 2, 3])
@@ -140,5 +141,31 @@ class BinUtilsTests: XCTestCase {
         XCTAssertEqual(a[0] as? Int, 1)
         XCTAssertEqual(a[1] as? Int, 2)
         XCTAssertEqual(a[2] as? Int, 3)
+    }
+}
+
+extension BinUtilsTests {
+    static var allTests: [
+        ( String, (BinUtilsTests) -> () throws -> Void )
+        ]
+    {
+        return [
+            ("testUnhexlify", testUnhexlify),
+            ("testHexlifyUnhexlify", testHexlifyUnhexlify),
+            ("testUnpack1", testUnpack1),
+            ("testUnpack2", testUnpack2),
+            ("testUnpack3", testUnpack3),
+            ("testUnpackNothing", testUnpackNothing),
+            ("testFormatSizes", testFormatSizes),
+            ("testPackLittleEndian", testPackLittleEndian),
+            ("testPackBigEndian", testPackBigEndian),
+            ("testPackWithPadding", testPackWithPadding),
+            ("testPackWithPaddingRepeat", testPackWithPaddingRepeat),
+            ("testPackWithRepeats", testPackWithRepeats),
+            ("testPackWithRepeatsPlusCharacter", testPackWithRepeatsPlusCharacter),
+            ("testPackString", testPackString),
+            ("testPack", testPack),
+            ("testPackUnpackNetworkOrder", testPackUnpackNetworkOrder),
+        ]
     }
 }
