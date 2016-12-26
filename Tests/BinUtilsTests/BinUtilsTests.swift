@@ -53,7 +53,7 @@ class BinUtilsTests: XCTestCase {
 
         XCTAssertEqual(a[0] as? Int, 1280)
         XCTAssertEqual(a[1] as? Int, 1)
-        XCTAssertEqual(a[2] as? String, "A")
+        XCTAssertEqual(a[2] as? NSString, "A")
         XCTAssertEqual(a[3] as? Double, 1.5)
     }
 
@@ -61,16 +61,16 @@ class BinUtilsTests: XCTestCase {
         let a = try! unpack("<I 2s f", unhexlify("010000006162cdcc2c40")!)
 
         XCTAssertEqual(a[0] as? Int, 1)
-        XCTAssertEqual(a[1] as? String, "ab")
+        XCTAssertEqual(a[1] as? NSString, "ab")
         XCTAssertEqual(a[2] as? Double, 2.700000047683716)
     }
 
     func testUnpack3() {
         let a = try! unpack("<2sss", unhexlify("41414141")!)
 
-        XCTAssertEqual(a[0] as? String, "AA")
-        XCTAssertEqual(a[1] as? String, "A")
-        XCTAssertEqual(a[2] as? String, "A")
+        XCTAssertEqual(a[0] as? NSString, "AA")
+        XCTAssertEqual(a[1] as? NSString, "A")
+        XCTAssertEqual(a[2] as? NSString, "A")
     }
 
     func testUnpackNothing() {
