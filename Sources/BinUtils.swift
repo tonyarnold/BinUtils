@@ -26,11 +26,11 @@ extension DataConvertible {
     
     init?(data: Data) {
         guard data.count == MemoryLayout<Self>.size else { return nil }
-        self = data.withUnsafeBytes { $0.pointee }
+        self = data.withUnsafeBytes { $0.load(as: Self.self) }
     }
-
+    
     init?(bytes: [UInt8]) {
-        let data = Data(bytes:bytes)
+        let data = Data(bytes)
         self.init(data:data)
     }
     
@@ -67,9 +67,7 @@ extension String {
 
 extension Data {
     var bytes : [UInt8] {
-        return self.withUnsafeBytes {
-            [UInt8](UnsafeBufferPointer(start: $0, count: self.count))
-        }
+        return [UInt8](self)
     }
 }
 
@@ -173,7 +171,7 @@ func numberOfBytesInFormat(_ format:String) -> Int {
         }
         
         let repeatCount = max(n,1)
-            
+        
         switch(c) {
             
         case "@", "<", "=", ">", "!", " ":
